@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="ProyectoCursoAPI.Application/ProyectoCursoAPI.Application.csproj" />
   <Project Path="ProyectoCursoAPI.Domain/ProyectoCursoAPI.Domain.csproj" />
+  <Project Path="ProyectoCursoAPI.Infrastructure/ProyectoCursoAPI.Infrastructure.csproj" />
   <Project Path="ProyectoCursoAPI.Web/ProyectoCursoAPI.Web.csproj" />
 </Solution>
