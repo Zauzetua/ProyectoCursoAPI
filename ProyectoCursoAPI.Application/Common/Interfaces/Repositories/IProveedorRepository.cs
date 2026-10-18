@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ProyectoCursoAPI.Application.Common.Interfaces.Repositories
 {
-    public interface IProveedorRepository : IGenericRepository<Proveedor>
+    internal interface IProveedorRepository : IGenericRepository<Proveedor>
     {
 
     }

@@ -8,8 +8,8 @@ namespace ProyectoCursoAPI.Domain.Common
     {
         public Guid Id { get; init; } = Guid.NewGuid();
         public string UsuarioAlta { get; protected set; } = string.Empty;
-        public string UsuarioModificacion { get; protected set; } = string.Empty;
-        public string UsuarioBaja { get; protected set; } = string.Empty;
+        public string? UsuarioModificacion { get; protected set; } = string.Empty;
+        public string? UsuarioBaja { get; protected set; } = string.Empty;
         public DateTime FechaCreacion { get; init; } = DateTime.UtcNow;
         public DateTime? FechaModificacion { get; protected set; }
         public DateTime? FechaBaja { get; protected set; }
