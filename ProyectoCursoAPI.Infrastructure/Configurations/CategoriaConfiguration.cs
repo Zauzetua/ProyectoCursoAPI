@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProyectoCursoAPI.Domain.Entities;
 using System;
@@ -7,10 +7,11 @@ using System.Text;
 
 namespace ProyectoCursoAPI.Infrastructure.Configurations
 {
-    internal sealed class CategoriaConfiguration : IEntityTypeConfiguration<Categoria>
+    internal sealed class CategoriaConfiguration : BaseEntityConfiguration<Categoria>
     {
-        public void Configure(EntityTypeBuilder<Categoria> builder)
+        public override void Configure(EntityTypeBuilder<Categoria> builder)
         {
+            base.Configure(builder);
             builder.ToTable("Categoria"); // Nombre de la tabla
 
             builder.HasKey(c => c.Id); // Clave primaria

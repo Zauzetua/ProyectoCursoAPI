@@ -21,7 +21,7 @@ namespace ProyectoCursoAPI.Domain.Entities
         //Este es el Id del proveedor al que pertenece el producto, es una clave foranea.
         public Guid IdProveedor { get; private set; }
         //Propiedad de navegacion para la relacion muchos a uno con Proveedor.
-        public virtual Proveedor Proveedor { get; private set; } = new Proveedor();
+        public virtual Proveedor Proveedor { get; private set; } = null!;
 
         private Producto() { } // Constructor privado para EF Core
 

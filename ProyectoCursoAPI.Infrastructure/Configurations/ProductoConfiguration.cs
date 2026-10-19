@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProyectoCursoAPI.Domain.Entities;
 using System;
@@ -7,10 +7,11 @@ using System.Text;
 
 namespace ProyectoCursoAPI.Infrastructure.Configurations
 {
-    internal sealed class ProductoConfiguration : IEntityTypeConfiguration<Producto>
+    internal sealed class ProductoConfiguration : BaseEntityConfiguration<Producto>
     {
-        public void Configure(EntityTypeBuilder<Producto> builder)
+        public override void Configure(EntityTypeBuilder<Producto> builder)
         {
+            base.Configure(builder);
             builder.ToTable("Producto"); // Nombre de la tabla
 
             builder.HasKey(p => p.Id); // Clave primaria

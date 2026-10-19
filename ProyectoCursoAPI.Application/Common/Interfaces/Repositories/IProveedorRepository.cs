@@ -5,8 +5,9 @@ using System.Text;
 
 namespace ProyectoCursoAPI.Application.Common.Interfaces.Repositories
 {
-    internal interface IProveedorRepository : IGenericRepository<Proveedor>
+    public interface IProveedorRepository : IGenericRepository<Proveedor>
     {
+        Task<Proveedor?> GetByRFC(string rfc);
 
     }
 }

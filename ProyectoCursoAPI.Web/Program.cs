@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProyectoCursoAPI.Infrastructure.Data;
+using ProyectoCursoAPI.Infrastructure.Configurations;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,12 +9,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Configuracion de Infrastructure
+DependencyInjection.AddInfrastructureServices(builder.Services, builder.Configuration);
+
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 var app = builder.Build();
 

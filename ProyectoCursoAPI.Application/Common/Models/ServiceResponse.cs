@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,7 +17,7 @@ namespace ProyectoCursoAPI.Application.Common.Models
         /// <summary>
         /// Mensaje, util para saber que paso.
         /// </summary>
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         /// <summary>
         /// Metodo que permite crear una respuesta exitosa.

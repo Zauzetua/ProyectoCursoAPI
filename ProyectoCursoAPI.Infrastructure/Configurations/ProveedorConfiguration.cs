@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProyectoCursoAPI.Domain.Entities;
 using System;
@@ -7,10 +7,11 @@ using System.Text;
 
 namespace ProyectoCursoAPI.Infrastructure.Configurations
 {
-    internal sealed class ProveedorConfiguration : IEntityTypeConfiguration<Proveedor>
+    internal sealed class ProveedorConfiguration : BaseEntityConfiguration<Proveedor>
     {
-        public void Configure(EntityTypeBuilder<Proveedor> builder)
+        public override void Configure(EntityTypeBuilder<Proveedor> builder)
         {
+            base.Configure(builder);
             builder.ToTable("Proveedor"); // Nombre de la tabla
 
             builder.HasKey(p => p.Id); // Clave primaria
@@ -18,6 +19,13 @@ namespace ProyectoCursoAPI.Infrastructure.Configurations
             builder.Property(p => p.NombreComercial)
                 .IsRequired()
                 .HasMaxLength(100);
+
+            builder.Property(p => p.RFC)
+                .IsRequired()
+                .HasMaxLength(13);
+
+            builder.HasIndex(p => p.RFC)
+                .IsUnique();
 
             builder.Property(p => p.Direccion)
                 .IsRequired()
