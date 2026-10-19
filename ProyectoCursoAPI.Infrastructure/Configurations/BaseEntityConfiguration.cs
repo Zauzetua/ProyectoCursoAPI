@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProyectoCursoAPI.Domain.Common;
 using System;
@@ -33,6 +33,9 @@ namespace ProyectoCursoAPI.Infrastructure.Configurations
             builder.Property(e => e.Activo)
                 .IsRequired()
                 .HasDefaultValue(true);
+
+            // Filtro global: entidades inactivas se excluyen automáticamente de todas las consultas
+            builder.HasQueryFilter(e => e.Activo);
         }
     }
 }
