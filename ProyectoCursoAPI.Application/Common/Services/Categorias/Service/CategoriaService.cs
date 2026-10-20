@@ -1,13 +1,13 @@
-using ProyectoCursoAPI.Application.Categorias.DTOs;
-using ProyectoCursoAPI.Application.Categorias.UseCases;
 using ProyectoCursoAPI.Application.Common.Interfaces.Services;
 using ProyectoCursoAPI.Application.Common.Models;
+using ProyectoCursoAPI.Application.Common.Services.Categorias.DTOs;
+using ProyectoCursoAPI.Application.Common.Services.Categorias.UseCases;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ProyectoCursoAPI.Application.Categorias.Services
+namespace ProyectoCursoAPI.Application.Common.Services.Categorias.Services
 {
     public class CategoriaService : ICategoriaService
     {

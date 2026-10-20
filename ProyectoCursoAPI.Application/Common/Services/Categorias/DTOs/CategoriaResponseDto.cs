@@ -1,7 +1,7 @@
 using ProyectoCursoAPI.Domain.Entities;
 using System;
 
-namespace ProyectoCursoAPI.Application.Categorias.DTOs
+namespace ProyectoCursoAPI.Application.Common.Services.Categorias.DTOs
 {
     public record CategoriaResponseDto
     {

@@ -1,7 +1,7 @@
 using FluentValidation;
 using System;
 
-namespace ProyectoCursoAPI.Application.Categorias.DTOs
+namespace ProyectoCursoAPI.Application.Common.Services.Categorias.DTOs
 {
     public record UpdateCategoriaDto(Guid Id, string Nombre, string? Descripcion);
 

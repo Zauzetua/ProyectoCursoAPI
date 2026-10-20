@@ -1,12 +1,12 @@
-using ProyectoCursoAPI.Application.Categorias.DTOs;
 using ProyectoCursoAPI.Application.Common.Interfaces.Repositories;
 using ProyectoCursoAPI.Application.Common.Models;
+using ProyectoCursoAPI.Application.Common.Services.Categorias.DTOs;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ProyectoCursoAPI.Application.Categorias.UseCases
+namespace ProyectoCursoAPI.Application.Common.Services.Categorias.UseCases
 {
     public interface IGetAllCategoriasUseCase
     {

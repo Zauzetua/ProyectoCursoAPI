@@ -1,8 +1,8 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using ProyectoCursoAPI.Application.Categorias.Services;
-using ProyectoCursoAPI.Application.Categorias.UseCases;
 using ProyectoCursoAPI.Application.Common.Interfaces.Services;
+using ProyectoCursoAPI.Application.Common.Services.Categorias.Services;
+using ProyectoCursoAPI.Application.Common.Services.Categorias.UseCases;
 using System.Reflection;
 
 namespace ProyectoCursoAPI.Application

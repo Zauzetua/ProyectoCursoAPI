@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ProyectoCursoAPI.Application.Categorias.UseCases
+namespace ProyectoCursoAPI.Application.Common.Services.Categorias.UseCases
 {
     public interface IDeleteCategoriaUseCase
     {

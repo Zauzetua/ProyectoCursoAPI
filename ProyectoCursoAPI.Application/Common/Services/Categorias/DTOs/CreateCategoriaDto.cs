@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace ProyectoCursoAPI.Application.Categorias.DTOs
+namespace ProyectoCursoAPI.Application.Common.Services.Categorias.DTOs
 {
     public record CreateCategoriaDto(string Nombre, string? Descripcion);
 

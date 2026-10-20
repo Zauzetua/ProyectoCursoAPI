@@ -1,5 +1,5 @@
-using ProyectoCursoAPI.Application.Categorias.DTOs;
 using ProyectoCursoAPI.Application.Common.Models;
+using ProyectoCursoAPI.Application.Common.Services.Categorias.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Threading;
