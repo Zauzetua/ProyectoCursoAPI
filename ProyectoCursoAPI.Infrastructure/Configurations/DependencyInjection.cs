@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProyectoCursoAPI.Application.Common.Interfaces.Repositories;
@@ -28,9 +28,9 @@ namespace ProyectoCursoAPI.Infrastructure.Configurations
             //Aqui van los repositorios de la capa de infraestructura.
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IProveedorRepository, ProveedorRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             //services.AddScoped<IProductoRepository, ProductoRepository>();
             //services.AddScoped<ICategoriaRepository, CategoriaRepository>();
-
         }
     }
 }
