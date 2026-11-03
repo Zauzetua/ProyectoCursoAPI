@@ -66,3 +66,6 @@ secrets.json
 # 8. Archivos generados por el sistema operativo
 .DS_Store
 Thumbs.db
+
+diag.txt
+build.binlog
