@@ -28,6 +28,7 @@ namespace ProyectoCursoAPI.Infrastructure.Configurations
             //Aqui van los repositorios de la capa de infraestructura.
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IProveedorRepository, ProveedorRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             //services.AddScoped<IProductoRepository, ProductoRepository>();
             //services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 
