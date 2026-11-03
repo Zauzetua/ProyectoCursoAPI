@@ -1,7 +1,11 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ProyectoCursoAPI.Application.Common.Exceptions;
 using ProyectoCursoAPI.Application.Common.Interfaces.Services;
+using ProyectoCursoAPI.Application.Common.Models;
 using ProyectoCursoAPI.Application.Common.Services.Categorias.DTOs;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,7 +26,7 @@ namespace ProyectoCursoAPI.Web.Controllers
         /// Obtiene todas las categorías activas.
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<CategoriaResponseDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
             var response = await _categoriaService.GetAllAsync(cancellationToken);
@@ -30,36 +34,37 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Obtiene una categoría por su identificador único.
+        /// Obtiene un listado paginado de categorías aplicando Skip y Take.
         /// </summary>
-        [HttpGet("{id:guid}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+        [HttpGet("paged")]
+        [ProducesResponseType(typeof(PagedResult<CategoriaResponseDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetPaged([FromQuery] PaginationParams pagination, CancellationToken cancellationToken)
         {
-            var response = await _categoriaService.GetByIdAsync(id, cancellationToken);
-            if (!response.Success)
-            {
-                return NotFound(new { mensaje = response.Message });
-            }
-
+            var response = await _categoriaService.GetPagedAsync(pagination, cancellationToken);
             return Ok(response.Data);
         }
 
         /// <summary>
-        /// Crea una nueva categoría.
+        /// Obtiene una categoría por su identificador único.
+        /// </summary>
+        [HttpGet("{id:guid}")]
+        [ProducesResponseType(typeof(CategoriaResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+        {
+            var response = await _categoriaService.GetByIdAsync(id, cancellationToken);
+            return Ok(response.Data);
+        }
+
+        /// <summary>
+        /// Crea una nueva categoría con validación FluentValidation.
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(CategoriaResponseDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] CreateCategoriaDto dto, CancellationToken cancellationToken)
         {
             var response = await _categoriaService.CreateAsync(dto, cancellationToken);
-            if (!response.Success)
-            {
-                return BadRequest(new { mensaje = response.Message });
-            }
-
             return CreatedAtAction(nameof(GetById), new { id = response.Data.Id }, response.Data);
         }
 
@@ -67,22 +72,17 @@ namespace ProyectoCursoAPI.Web.Controllers
         /// Actualiza una categoría existente.
         /// </summary>
         [HttpPut("{id:guid}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(CategoriaResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoriaDto dto, CancellationToken cancellationToken)
         {
             if (id != dto.Id)
             {
-                return BadRequest(new { mensaje = "El ID de la ruta no coincide con el ID del cuerpo de la petición." });
+                throw new ValidationException("Id", "El ID de la ruta no coincide con el ID del cuerpo de la petición.");
             }
 
             var response = await _categoriaService.UpdateAsync(dto, cancellationToken);
-            if (!response.Success)
-            {
-                return NotFound(new { mensaje = response.Message });
-            }
-
             return Ok(response.Data);
         }
 
@@ -91,15 +91,10 @@ namespace ProyectoCursoAPI.Web.Controllers
         /// </summary>
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            var response = await _categoriaService.DeleteAsync(id, cancellationToken);
-            if (!response.Success)
-            {
-                return NotFound(new { mensaje = response.Message });
-            }
-
+            await _categoriaService.DeleteAsync(id, cancellationToken);
             return NoContent();
         }
     }

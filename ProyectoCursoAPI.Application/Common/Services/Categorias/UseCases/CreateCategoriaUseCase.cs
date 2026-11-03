@@ -1,11 +1,12 @@
 using FluentValidation;
+using ProyectoCursoAPI.Application.Common.Exceptions;
 using ProyectoCursoAPI.Application.Common.Interfaces.Repositories;
 using ProyectoCursoAPI.Application.Common.Models;
 using ProyectoCursoAPI.Application.Common.Services.Categorias.DTOs;
 using ProyectoCursoAPI.Domain.Entities;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ValidationException = ProyectoCursoAPI.Application.Common.Exceptions.ValidationException;
 
 namespace ProyectoCursoAPI.Application.Common.Services.Categorias.UseCases
 {
@@ -30,8 +31,7 @@ namespace ProyectoCursoAPI.Application.Common.Services.Categorias.UseCases
             var validationResult = await _validator.ValidateAsync(dto, cancellationToken);
             if (!validationResult.IsValid)
             {
-                var errors = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
-                return ServiceResponse<CategoriaResponseDto>.Fail(errors);
+                throw new ValidationException(validationResult.Errors);
             }
 
             var categoria = new Categoria(dto.Nombre, dto.Descripcion ?? string.Empty);

@@ -19,6 +19,7 @@ namespace ProyectoCursoAPI.Application
             services.AddScoped<IUpdateCategoriaUseCase, UpdateCategoriaUseCase>();
             services.AddScoped<IGetCategoriaByIdUseCase, GetCategoriaByIdUseCase>();
             services.AddScoped<IGetAllCategoriasUseCase, GetAllCategoriasUseCase>();
+            services.AddScoped<IGetPagedCategoriasUseCase, GetPagedCategoriasUseCase>();
             services.AddScoped<IDeleteCategoriaUseCase, DeleteCategoriaUseCase>();
 
             // Servicio integrador

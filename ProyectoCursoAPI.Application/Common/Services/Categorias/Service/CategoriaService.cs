@@ -15,6 +15,7 @@ namespace ProyectoCursoAPI.Application.Common.Services.Categorias.Services
         private readonly IUpdateCategoriaUseCase _updateUseCase;
         private readonly IGetCategoriaByIdUseCase _getByIdUseCase;
         private readonly IGetAllCategoriasUseCase _getAllUseCase;
+        private readonly IGetPagedCategoriasUseCase _getPagedUseCase;
         private readonly IDeleteCategoriaUseCase _deleteUseCase;
 
         public CategoriaService(
@@ -22,12 +23,14 @@ namespace ProyectoCursoAPI.Application.Common.Services.Categorias.Services
             IUpdateCategoriaUseCase updateUseCase,
             IGetCategoriaByIdUseCase getByIdUseCase,
             IGetAllCategoriasUseCase getAllUseCase,
+            IGetPagedCategoriasUseCase getPagedUseCase,
             IDeleteCategoriaUseCase deleteUseCase)
         {
             _createUseCase = createUseCase;
             _updateUseCase = updateUseCase;
             _getByIdUseCase = getByIdUseCase;
             _getAllUseCase = getAllUseCase;
+            _getPagedUseCase = getPagedUseCase;
             _deleteUseCase = deleteUseCase;
         }
 
@@ -42,6 +45,9 @@ namespace ProyectoCursoAPI.Application.Common.Services.Categorias.Services
 
         public Task<ServiceResponse<IEnumerable<CategoriaResponseDto>>> GetAllAsync(CancellationToken cancellationToken = default)
             => _getAllUseCase.ExecuteAsync(cancellationToken);
+
+        public Task<ServiceResponse<PagedResult<CategoriaResponseDto>>> GetPagedAsync(PaginationParams paginationParams, CancellationToken cancellationToken = default)
+            => _getPagedUseCase.ExecuteAsync(paginationParams, cancellationToken);
 
         public Task<ServiceResponse<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
             => _deleteUseCase.ExecuteAsync(id, cancellationToken);

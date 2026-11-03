@@ -1,5 +1,7 @@
+using ProyectoCursoAPI.Application.Common.Exceptions;
 using ProyectoCursoAPI.Application.Common.Interfaces.Repositories;
 using ProyectoCursoAPI.Application.Common.Models;
+using ProyectoCursoAPI.Domain.Entities;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,7 +27,7 @@ namespace ProyectoCursoAPI.Application.Common.Services.Categorias.UseCases
             var categoria = await _unitOfWork.Categorias.GetByIdAsync(id);
             if (categoria is null)
             {
-                return ServiceResponse<bool>.Fail($"No se encontró la categoría con ID '{id}'.");
+                throw new NotFoundException(nameof(Categoria), id);
             }
 
             _unitOfWork.Categorias.Delete(categoria);

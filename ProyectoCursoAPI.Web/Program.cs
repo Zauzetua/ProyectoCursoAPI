@@ -1,10 +1,10 @@
-using Microsoft.EntityFrameworkCore;
-using ProyectoCursoAPI.Infrastructure.Data;
-using System.Runtime.CompilerServices;
-using ProyectoCursoAPI.Application;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi;
-
-
+using ProyectoCursoAPI.Application;
+using ProyectoCursoAPI.Infrastructure.Configurations;
+using ProyectoCursoAPI.Web.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,20 +19,21 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Documentación interactiva de endpoints y API"
     });
 });
-//Configuracion de Infrastructure
-ProyectoCursoAPI.Infrastructure.Configurations.DependencyInjection.AddInfrastructureServices(builder.Services, builder.Configuration);
-//COnfiguracion de Application
-ProyectoCursoAPI.Application.DependencyInjection.AddApplicationServices(builder.Services);
+
+// Configuración de Infrastructure y Application
+builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddApplicationServices();
+
+// Manejo global de excepciones (RFC 9457 Problem Details)
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddControllers();
 
-
-
-
 var app = builder.Build();
 
-
-
+// Middleware centralizado de manejo global de excepciones (RFC 9457)
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
@@ -41,11 +42,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "Mi API v1");
-
-        // Carga Swagger UI directamente en la raiz de la aplicacion
         options.RoutePrefix = string.Empty;
     });
-
 }
 
 app.UseHttpsRedirection();

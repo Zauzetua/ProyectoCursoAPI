@@ -4,8 +4,9 @@ using ProyectoCursoAPI.Domain.Common;
 using ProyectoCursoAPI.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace ProyectoCursoAPI.Infrastructure.Repositories
 {
@@ -25,6 +26,7 @@ namespace ProyectoCursoAPI.Infrastructure.Repositories
             _context = context;
             _dbSet = context.Set<T>();
         }
+
         public async Task AddAsync(T entity)
         {
             await _context.Set<T>().AddAsync(entity);
@@ -58,6 +60,34 @@ namespace ProyectoCursoAPI.Infrastructure.Repositories
         public void Update(T entity)
         {
             _dbSet.Update(entity);
+        }
+
+        public async Task<(IReadOnlyList<T> Items, int TotalCount)> GetPagedAsync(
+            int pageNumber,
+            int pageSize,
+            Expression<Func<T, bool>>? predicate = null,
+            bool asNoTracking = true)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (asNoTracking)
+            {
+                query = query.AsNoTracking();
+            }
+
+            if (predicate != null)
+            {
+                query = query.Where(predicate);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
         }
     }
 }

@@ -13,6 +13,7 @@ namespace ProyectoCursoAPI.Application.Common.Interfaces.Services
         Task<ServiceResponse<CategoriaResponseDto>> UpdateAsync(UpdateCategoriaDto dto, CancellationToken cancellationToken = default);
         Task<ServiceResponse<CategoriaResponseDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<ServiceResponse<IEnumerable<CategoriaResponseDto>>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<ServiceResponse<PagedResult<CategoriaResponseDto>>> GetPagedAsync(PaginationParams paginationParams, CancellationToken cancellationToken = default);
         Task<ServiceResponse<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }
