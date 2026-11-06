@@ -69,3 +69,7 @@ Thumbs.db
 
 diag.txt
 build.binlog
+
+# 9. Contexto de Inteligencia Artificial / Agentes
+.AGENTS.md
+*.binlog

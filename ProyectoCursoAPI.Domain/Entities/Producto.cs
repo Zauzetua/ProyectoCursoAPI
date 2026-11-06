@@ -1,4 +1,4 @@
-﻿using ProyectoCursoAPI.Domain.Common;
+using ProyectoCursoAPI.Domain.Common;
 using ProyectoCursoAPI.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -39,15 +39,22 @@ namespace ProyectoCursoAPI.Domain.Entities
             IdProveedor = idProveedor;
         }
 
-        public void Actualizar(string nombre, string descripcion, decimal precio, Guid idCategoria, Guid idProveedor)
+        public void Actualizar(string nombre, string descripcion, decimal precio, int stock, Guid idCategoria, Guid idProveedor)
         {
             ValidarNombre(nombre);
             ValidarPrecio(precio);
+            ValidarStock(stock);
             Nombre = nombre;
             Descripcion = descripcion;
             Precio = precio;
+            Stock = stock;
             IdCategoria = idCategoria;
             IdProveedor = idProveedor;
+        }
+
+        public void Actualizar(string nombre, string descripcion, decimal precio, Guid idCategoria, Guid idProveedor)
+        {
+            Actualizar(nombre, descripcion, precio, Stock, idCategoria, idProveedor);
         }
 
         private static void ValidarNombre(string nombre)

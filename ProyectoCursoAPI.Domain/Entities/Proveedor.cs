@@ -1,4 +1,4 @@
-﻿using ProyectoCursoAPI.Domain.Common;
+using ProyectoCursoAPI.Domain.Common;
 using ProyectoCursoAPI.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -19,6 +19,17 @@ namespace ProyectoCursoAPI.Domain.Entities
         private Proveedor() { } // Constructor privado para EF Core 
 
         public Proveedor(string nombreComercial, string direccion, string telefono, string rfc, string email)
+        {
+            ValidarRFC(rfc);
+            ValidarTelefono(telefono);
+            NombreComercial = nombreComercial;
+            Direccion = direccion;
+            Telefono = telefono;
+            RFC = rfc;
+            Email = email;
+        }
+
+        public void Actualizar(string nombreComercial, string direccion, string telefono, string rfc, string email)
         {
             ValidarRFC(rfc);
             ValidarTelefono(telefono);
