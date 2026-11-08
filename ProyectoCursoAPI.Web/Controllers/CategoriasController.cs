@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoCursoAPI.Application.Common.Exceptions;
@@ -13,6 +14,7 @@ namespace ProyectoCursoAPI.Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class CategoriasController : ControllerBase
     {
         private readonly ICategoriaService _categoriaService;
@@ -23,9 +25,10 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Obtiene todas las categorías activas.
+        /// Obtiene todas las categorías activas (acceso público).
         /// </summary>
         [HttpGet]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<CategoriaResponseDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
@@ -34,9 +37,10 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Obtiene un listado paginado de categorías aplicando Skip y Take.
+        /// Obtiene un listado paginado de categorías aplicando Skip y Take (acceso público).
         /// </summary>
         [HttpGet("paged")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(PagedResult<CategoriaResponseDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPaged([FromQuery] PaginationParams pagination, CancellationToken cancellationToken)
         {
@@ -45,9 +49,10 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Obtiene una categoría por su identificador único.
+        /// Obtiene una categoría por su identificador único (acceso público).
         /// </summary>
         [HttpGet("{id:guid}")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(CategoriaResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
@@ -57,11 +62,12 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Crea una nueva categoría con validación FluentValidation.
+        /// Crea una nueva categoría con validación FluentValidation (requiere autenticación JWT).
         /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(CategoriaResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Create([FromBody] CreateCategoriaDto dto, CancellationToken cancellationToken)
         {
             var response = await _categoriaService.CreateAsync(dto, cancellationToken);
@@ -69,12 +75,13 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Actualiza una categoría existente.
+        /// Actualiza una categoría existente (requiere autenticación JWT).
         /// </summary>
         [HttpPut("{id:guid}")]
         [ProducesResponseType(typeof(CategoriaResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoriaDto dto, CancellationToken cancellationToken)
         {
             if (id != dto.Id)
@@ -87,11 +94,12 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Elimina lógicamente una categoría por su identificador único.
+        /// Elimina lógicamente una categoría por su identificador único (requiere autenticación JWT).
         /// </summary>
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
             await _categoriaService.DeleteAsync(id, cancellationToken);

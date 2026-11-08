@@ -1,12 +1,12 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProyectoCursoAPI.Application.Common.Interfaces.Repositories;
+using ProyectoCursoAPI.Application.Common.Interfaces.Services;
 using ProyectoCursoAPI.Infrastructure.Data;
 using ProyectoCursoAPI.Infrastructure.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using ProyectoCursoAPI.Infrastructure.Services;
 
 namespace ProyectoCursoAPI.Infrastructure.Configurations
 {
@@ -20,6 +20,23 @@ namespace ProyectoCursoAPI.Infrastructure.Configurations
                     configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
+            // Configuración de ASP.NET Core Identity (API / Tokens)
+            services.AddIdentityCore<IdentityUser>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            // Servicios de infraestructura para seguridad y JWT
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
+            services.AddScoped<IAuthService, AuthService>();
+
             AddRepositories(services);
         }
 
@@ -29,8 +46,6 @@ namespace ProyectoCursoAPI.Infrastructure.Configurations
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IProveedorRepository, ProveedorRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            //services.AddScoped<IProductoRepository, ProductoRepository>();
-            //services.AddScoped<ICategoriaRepository, CategoriaRepository>();
         }
     }
 }

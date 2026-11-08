@@ -1,17 +1,24 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using ProyectoCursoAPI.Application.Common.Interfaces.Services;
 using ProyectoCursoAPI.Domain.Common;
 using ProyectoCursoAPI.Domain.Entities;
-using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace ProyectoCursoAPI.Infrastructure.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        private readonly ICurrentUserService? _currentUserService;
+
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options,
+            ICurrentUserService? currentUserService = null) : base(options)
         {
+            _currentUserService = currentUserService;
         }
 
         public DbSet<Producto> Producto { get; set; }
@@ -39,21 +46,24 @@ namespace ProyectoCursoAPI.Infrastructure.Data
 
         private void ApplyAuditInformation()
         {
+            var currentUser = _currentUserService?.UserId
+                ?? _currentUserService?.UserName
+                ?? "Sistema";
+
             foreach (var entry in ChangeTracker.Entries<BaseEntity>())
             {
                 switch (entry.State)
                 {
                     case EntityState.Added:
                         var usuarioAlta = string.IsNullOrWhiteSpace(entry.Entity.UsuarioAlta)
-                            ? "Sistema"
+                            ? currentUser
                             : entry.Entity.UsuarioAlta;
                         entry.Entity.SetAuditoriaCreacion(usuarioAlta);
                         break;
 
                     case EntityState.Modified:
-                        // Si ya está marcada para baja o modificada
                         var usuarioMod = string.IsNullOrWhiteSpace(entry.Entity.UsuarioModificacion)
-                            ? "Sistema"
+                            ? currentUser
                             : entry.Entity.UsuarioModificacion;
                         entry.Entity.SetAuditoriaModificacion(usuarioMod);
                         break;
@@ -62,7 +72,7 @@ namespace ProyectoCursoAPI.Infrastructure.Data
                         // Convierte borrado físico en borrado lógico (Soft Delete) automáticamente
                         entry.State = EntityState.Modified;
                         var usuarioBaja = string.IsNullOrWhiteSpace(entry.Entity.UsuarioBaja)
-                            ? "Sistema"
+                            ? currentUser
                             : entry.Entity.UsuarioBaja;
                         entry.Entity.Desactivar(usuarioBaja);
                         break;

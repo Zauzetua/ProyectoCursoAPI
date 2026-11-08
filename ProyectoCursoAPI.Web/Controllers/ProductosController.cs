@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoCursoAPI.Application.Common.Exceptions;
@@ -13,6 +14,7 @@ namespace ProyectoCursoAPI.Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ProductosController : ControllerBase
     {
         private readonly IProductoService _productoService;
@@ -23,9 +25,10 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Obtiene todos los productos activos.
+        /// Obtiene todos los productos activos (acceso público).
         /// </summary>
         [HttpGet]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<ProductoResponseDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
@@ -34,9 +37,10 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Obtiene un listado paginado de productos aplicando Skip y Take.
+        /// Obtiene un listado paginado de productos aplicando Skip y Take (acceso público).
         /// </summary>
         [HttpGet("paged")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(PagedResult<ProductoResponseDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPaged([FromQuery] PaginationParams pagination, CancellationToken cancellationToken)
         {
@@ -45,9 +49,10 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Obtiene un producto por su identificador único.
+        /// Obtiene un producto por su identificador único (acceso público).
         /// </summary>
         [HttpGet("{id:guid}")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(ProductoResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
@@ -57,12 +62,13 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Crea un nuevo producto con validación FluentValidation.
+        /// Crea un nuevo producto con validación FluentValidation (requiere autenticación JWT).
         /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(ProductoResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Create([FromBody] CreateProductoDto dto, CancellationToken cancellationToken)
         {
             var response = await _productoService.CreateAsync(dto, cancellationToken);
@@ -70,12 +76,13 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Actualiza un producto existente.
+        /// Actualiza un producto existente (requiere autenticación JWT).
         /// </summary>
         [HttpPut("{id:guid}")]
         [ProducesResponseType(typeof(ProductoResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductoDto dto, CancellationToken cancellationToken)
         {
             if (id != dto.Id)
@@ -88,11 +95,12 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Elimina lógicamente un producto por su identificador único.
+        /// Elimina lógicamente un producto por su identificador único (requiere autenticación JWT).
         /// </summary>
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
             await _productoService.DeleteAsync(id, cancellationToken);

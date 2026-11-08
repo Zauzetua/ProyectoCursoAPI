@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoCursoAPI.Application.Common.Exceptions;
@@ -13,6 +14,7 @@ namespace ProyectoCursoAPI.Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ProveedoresController : ControllerBase
     {
         private readonly IProveedorService _proveedorService;
@@ -23,9 +25,10 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Obtiene todos los proveedores activos.
+        /// Obtiene todos los proveedores activos (acceso público).
         /// </summary>
         [HttpGet]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<ProveedorResponseDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
@@ -34,9 +37,10 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Obtiene un listado paginado de proveedores aplicando Skip y Take.
+        /// Obtiene un listado paginado de proveedores aplicando Skip y Take (acceso público).
         /// </summary>
         [HttpGet("paged")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(PagedResult<ProveedorResponseDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPaged([FromQuery] PaginationParams pagination, CancellationToken cancellationToken)
         {
@@ -45,9 +49,10 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Obtiene un proveedor por su identificador único.
+        /// Obtiene un proveedor por su identificador único (acceso público).
         /// </summary>
         [HttpGet("{id:guid}")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(ProveedorResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
@@ -57,9 +62,10 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Obtiene un proveedor por su RFC.
+        /// Obtiene un proveedor por su RFC (acceso público).
         /// </summary>
         [HttpGet("rfc/{rfc}")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(ProveedorResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetByRfc(string rfc, CancellationToken cancellationToken)
@@ -69,11 +75,12 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Crea un nuevo proveedor con validación FluentValidation.
+        /// Crea un nuevo proveedor con validación FluentValidation (requiere autenticación JWT).
         /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(ProveedorResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Create([FromBody] CreateProveedorDto dto, CancellationToken cancellationToken)
         {
             var response = await _proveedorService.CreateAsync(dto, cancellationToken);
@@ -81,12 +88,13 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Actualiza un proveedor existente.
+        /// Actualiza un proveedor existente (requiere autenticación JWT).
         /// </summary>
         [HttpPut("{id:guid}")]
         [ProducesResponseType(typeof(ProveedorResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProveedorDto dto, CancellationToken cancellationToken)
         {
             if (id != dto.Id)
@@ -99,11 +107,12 @@ namespace ProyectoCursoAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Elimina lógicamente un proveedor por su identificador único.
+        /// Elimina lógicamente un proveedor por su identificador único (requiere autenticación JWT).
         /// </summary>
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
             await _proveedorService.DeleteAsync(id, cancellationToken);
