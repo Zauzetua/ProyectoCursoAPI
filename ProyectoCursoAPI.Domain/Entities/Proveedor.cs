@@ -55,6 +55,9 @@ namespace ProyectoCursoAPI.Domain.Entities
                 throw new DomainException("El RFC del proveedor es obligatorio.");
             if (rfc.Length != 12 && rfc.Length != 13)
                 throw new DomainException("El RFC del proveedor debe tener 12 o 13 caracteres.");
+                var regex = @"^[A-ZÑ]{4}\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[A-Z\d]{2}[0-9A]$";
+            if (!System.Text.RegularExpressions.Regex.IsMatch(rfc, regex))
+                throw new DomainException("El RFC del proveedor no tiene un formato válido.");
             //Se simula que se valida el RFC.
         }
 
