@@ -6,19 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ProyectoCursoAPI.Infrastructure.Repositories
 {
+    // Implementacion generica de operaciones de acceso a datos con EF Core y soporte de CancellationToken
     public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
-        /// <summary>
-        /// Esto representa el contexto de la base de datos, que es responsable de interactuar con la base de datos y realizar operaciones CRUD.
-        /// </summary>
         protected readonly ApplicationDbContext _context;
-        /// <summary>
-        /// Este repreenta el conjunto de entidades del tipo T en la base de datos. Es utilizado para realizar operaciones específicas en la entidad T.
-        /// </summary>
         protected readonly DbSet<T> _dbSet;
 
         public GenericRepository(ApplicationDbContext context)
@@ -27,34 +23,38 @@ namespace ProyectoCursoAPI.Infrastructure.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public async Task AddAsync(T entity)
+        public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
         {
-            await _context.Set<T>().AddAsync(entity);
-            //No hacemos save, porque el UnitOfWork se encargara de eso
+            await _dbSet.AddAsync(entity, cancellationToken);
         }
 
         public void Delete(T entity)
         {
-            _context.Set<T>().Remove(entity);
+            _dbSet.Remove(entity);
         }
 
-        public async Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = true)
+        public async Task<IReadOnlyList<T>> FindAsync(
+            Expression<Func<T, bool>> predicate,
+            bool asNoTracking = true,
+            CancellationToken cancellationToken = default)
         {
+            IQueryable<T> query = _dbSet;
             if (asNoTracking)
             {
-                return await _dbSet.Where(predicate).AsNoTracking().ToListAsync();
+                query = query.AsNoTracking();
             }
-            return await _dbSet.Where(predicate).ToListAsync();
+
+            return await query.Where(predicate).ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet.ToListAsync(cancellationToken);
         }
 
-        public async Task<T?> GetByIdAsync(Guid id)
+        public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _dbSet.FindAsync(id);
+            return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
         }
 
         public void Update(T entity)
@@ -66,7 +66,8 @@ namespace ProyectoCursoAPI.Infrastructure.Repositories
             int pageNumber,
             int pageSize,
             Expression<Func<T, bool>>? predicate = null,
-            bool asNoTracking = true)
+            bool asNoTracking = true,
+            CancellationToken cancellationToken = default)
         {
             IQueryable<T> query = _dbSet;
 
@@ -80,12 +81,12 @@ namespace ProyectoCursoAPI.Infrastructure.Repositories
                 query = query.Where(predicate);
             }
 
-            var totalCount = await query.CountAsync();
+            var totalCount = await query.CountAsync(cancellationToken);
 
             var items = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return (items, totalCount);
         }

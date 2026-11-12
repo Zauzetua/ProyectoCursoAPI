@@ -30,6 +30,14 @@ namespace ProyectoCursoAPI.Application.Common.Models
         private int _pageSize = 10;
         private int _pageNumber = 1;
 
+        public PaginationParams() { }
+
+        public PaginationParams(int pageNumber, int pageSize)
+        {
+            PageNumber = pageNumber;
+            PageSize = pageSize;
+        }
+
         public int PageNumber
         {
             get => _pageNumber;

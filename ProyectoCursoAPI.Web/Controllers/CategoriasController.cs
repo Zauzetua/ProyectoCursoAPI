@@ -1,21 +1,21 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoCursoAPI.Application.Common.Exceptions;
 using ProyectoCursoAPI.Application.Common.Interfaces.Services;
 using ProyectoCursoAPI.Application.Common.Models;
-using ProyectoCursoAPI.Application.Common.Services.Categorias.DTOs;
+using ProyectoCursoAPI.Application.Features.Categorias.DTOs;
+using ProyectoCursoAPI.Domain.Exceptions;
+using ProyectoCursoAPI.Web.Models.Categorias;
+using ProyectoCursoAPI.Web.Models.Shared;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace ProyectoCursoAPI.Web.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
+    // Controlador MVC para Categorias: maneja la vista unica y endpoints AJAX para modales y tabla
     [Authorize]
-    public class CategoriasController : ControllerBase
+    public class CategoriasController : Controller
     {
         private readonly ICategoriaService _categoriaService;
 
@@ -24,86 +24,177 @@ namespace ProyectoCursoAPI.Web.Controllers
             _categoriaService = categoriaService;
         }
 
-        /// <summary>
-        /// Obtiene todas las categorías activas (acceso público).
-        /// </summary>
+        // 1. Vista principal unica
         [HttpGet]
-        [AllowAnonymous]
-        [ProducesResponseType(typeof(IEnumerable<CategoriaResponseDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
-            var response = await _categoriaService.GetAllAsync(cancellationToken);
-            return Ok(response.Data);
-        }
+            var paged = await _categoriaService.GetPagedAsync(new PaginationParams(page, pageSize), cancellationToken);
 
-        /// <summary>
-        /// Obtiene un listado paginado de categorías aplicando Skip y Take (acceso público).
-        /// </summary>
-        [HttpGet("paged")]
-        [AllowAnonymous]
-        [ProducesResponseType(typeof(PagedResult<CategoriaResponseDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetPaged([FromQuery] PaginationParams pagination, CancellationToken cancellationToken)
-        {
-            var response = await _categoriaService.GetPagedAsync(pagination, cancellationToken);
-            return Ok(response.Data);
-        }
-
-        /// <summary>
-        /// Obtiene una categoría por su identificador único (acceso público).
-        /// </summary>
-        [HttpGet("{id:guid}")]
-        [AllowAnonymous]
-        [ProducesResponseType(typeof(CategoriaResponseDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
-        {
-            var response = await _categoriaService.GetByIdAsync(id, cancellationToken);
-            return Ok(response.Data);
-        }
-
-        /// <summary>
-        /// Crea una nueva categoría con validación FluentValidation (requiere autenticación JWT).
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(typeof(CategoriaResponseDto), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> Create([FromBody] CreateCategoriaDto dto, CancellationToken cancellationToken)
-        {
-            var response = await _categoriaService.CreateAsync(dto, cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { id = response.Data.Id }, response.Data);
-        }
-
-        /// <summary>
-        /// Actualiza una categoría existente (requiere autenticación JWT).
-        /// </summary>
-        [HttpPut("{id:guid}")]
-        [ProducesResponseType(typeof(CategoriaResponseDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoriaDto dto, CancellationToken cancellationToken)
-        {
-            if (id != dto.Id)
+            var model = new CategoriaIndexViewModel
             {
-                throw new ValidationException("Id", "El ID de la ruta no coincide con el ID del cuerpo de la petición.");
+                PagedResult = paged,
+                Pagination = new PaginationInfo
+                {
+                    CurrentPage = paged.PageNumber,
+                    TotalPages = paged.TotalPages,
+                    PageSize = paged.PageSize,
+                    TotalCount = paged.TotalCount,
+                    TargetAction = "GetTable"
+                }
+            };
+
+            return View(model);
+        }
+
+        // 2. Carga asincrona del cuerpo de la tabla para paginado y refresco sin recargar la pagina
+        [HttpGet]
+        public async Task<IActionResult> GetTable(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
+        {
+            var paged = await _categoriaService.GetPagedAsync(new PaginationParams(page, pageSize), cancellationToken);
+
+            var model = new CategoriaIndexViewModel
+            {
+                PagedResult = paged,
+                Pagination = new PaginationInfo
+                {
+                    CurrentPage = paged.PageNumber,
+                    TotalPages = paged.TotalPages,
+                    PageSize = paged.PageSize,
+                    TotalCount = paged.TotalCount,
+                    TargetAction = "GetTable"
+                }
+            };
+
+            return PartialView("_TablePartial", model);
+        }
+
+        // 3. Obtener modal de creacion (HTML parcial)
+        [HttpGet]
+        public IActionResult GetCreateModal()
+        {
+            var form = new CategoriaFormViewModel();
+            return PartialView("_FormModal", form);
+        }
+
+        // 4. Procesar creacion via AJAX
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CategoriaFormViewModel model, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                return PartialView("_FormModal", model);
             }
 
-            var response = await _categoriaService.UpdateAsync(dto, cancellationToken);
-            return Ok(response.Data);
+            try
+            {
+                var dto = new CreateCategoriaDto
+                {
+                    Nombre = model.Nombre,
+                    Descripcion = model.Descripcion ?? string.Empty
+                };
+
+                await _categoriaService.CreateAsync(dto, cancellationToken);
+                return Json(new { success = true, message = "Categoria creada exitosamente." });
+            }
+            catch (ValidationException ex)
+            {
+                foreach (var err in ex.Errors)
+                {
+                    foreach (var msg in err.Value)
+                    {
+                        ModelState.AddModelError(err.Key, msg);
+                    }
+                }
+                return PartialView("_FormModal", model);
+            }
+            catch (DomainException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return PartialView("_FormModal", model);
+            }
         }
 
-        /// <summary>
-        /// Elimina lógicamente una categoría por su identificador único (requiere autenticación JWT).
-        /// </summary>
-        [HttpDelete("{id:guid}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        // 5. Obtener modal de edicion con datos cargados
+        [HttpGet]
+        public async Task<IActionResult> GetEditModal(Guid id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var cat = await _categoriaService.GetByIdAsync(id, cancellationToken);
+                var form = new CategoriaFormViewModel
+                {
+                    Id = cat.Id,
+                    Nombre = cat.Nombre,
+                    Descripcion = cat.Descripcion
+                };
+                return PartialView("_FormModal", form);
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        // 6. Procesar edicion via AJAX
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(CategoriaFormViewModel model, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid || !model.Id.HasValue)
+            {
+                return PartialView("_FormModal", model);
+            }
+
+            try
+            {
+                var dto = new UpdateCategoriaDto
+                {
+                    Id = model.Id.Value,
+                    Nombre = model.Nombre,
+                    Descripcion = model.Descripcion ?? string.Empty,
+                    Activo = true
+                };
+
+                await _categoriaService.UpdateAsync(dto, cancellationToken);
+                return Json(new { success = true, message = "Categoria actualizada exitosamente." });
+            }
+            catch (ValidationException ex)
+            {
+                foreach (var err in ex.Errors)
+                {
+                    foreach (var msg in err.Value)
+                    {
+                        ModelState.AddModelError(err.Key, msg);
+                    }
+                }
+                return PartialView("_FormModal", model);
+            }
+            catch (DomainException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return PartialView("_FormModal", model);
+            }
+        }
+
+        // 7. Eliminacion logica via AJAX
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            await _categoriaService.DeleteAsync(id, cancellationToken);
-            return NoContent();
+            try
+            {
+                await _categoriaService.DeleteAsync(id, cancellationToken);
+                return Json(new { success = true, message = "Categoria eliminada exitosamente." });
+            }
+            catch (NotFoundException ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

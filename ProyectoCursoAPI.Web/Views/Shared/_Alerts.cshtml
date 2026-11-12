@@ -1,0 +1,25 @@
+@using ProyectoCursoAPI.Web.Extensions
+
+@if (TempData[TempDataExtensions.SuccessKey] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData[TempDataExtensions.SuccessKey]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData[TempDataExtensions.ErrorKey] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData[TempDataExtensions.ErrorKey]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData[TempDataExtensions.InfoKey] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @TempData[TempDataExtensions.InfoKey]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}

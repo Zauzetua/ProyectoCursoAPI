@@ -1,21 +1,22 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using ProyectoCursoAPI.Application.Common.Interfaces.Services;
-using ProyectoCursoAPI.Application.Common.Services.Categorias.Services;
-using ProyectoCursoAPI.Application.Common.Services.Categorias.UseCases;
-using ProyectoCursoAPI.Application.Common.Services.Productos.Services;
-using ProyectoCursoAPI.Application.Common.Services.Productos.UseCases;
-using ProyectoCursoAPI.Application.Common.Services.Proveedores.Services;
-using ProyectoCursoAPI.Application.Common.Services.Proveedores.UseCases;
+using ProyectoCursoAPI.Application.Features.Categorias.Services;
+using ProyectoCursoAPI.Application.Features.Categorias.UseCases;
+using ProyectoCursoAPI.Application.Features.Productos.Services;
+using ProyectoCursoAPI.Application.Features.Productos.UseCases;
+using ProyectoCursoAPI.Application.Features.Proveedores.Services;
+using ProyectoCursoAPI.Application.Features.Proveedores.UseCases;
 using System.Reflection;
 
 namespace ProyectoCursoAPI.Application
 {
+    // Registro de dependencias de la capa de aplicacion
     public static class DependencyInjection
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            // FluentValidation: registra todos los validadores del ensamblado
+            // FluentValidation: registra todos los validadores del ensamblado de Application
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             // Use Cases - Categorias
@@ -43,7 +44,7 @@ namespace ProyectoCursoAPI.Application
             services.AddScoped<IGetPagedProveedoresUseCase, GetPagedProveedoresUseCase>();
             services.AddScoped<IDeleteProveedorUseCase, DeleteProveedorUseCase>();
 
-            // Servicios integradores
+            // Servicios integradores / fachada
             services.AddScoped<ICategoriaService, CategoriaService>();
             services.AddScoped<IProductoService, ProductoService>();
             services.AddScoped<IProveedorService, ProveedorService>();

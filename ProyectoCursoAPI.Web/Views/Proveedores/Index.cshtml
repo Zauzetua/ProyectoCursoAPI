@@ -1,0 +1,70 @@
+@model ProyectoCursoAPI.Web.Models.Proveedores.ProveedorIndexViewModel
+@{
+    ViewData["Title"] = "Gestion de Proveedores";
+}
+
+<!-- Token antiforgery para peticiones AJAX de borrado -->
+@Html.AntiForgeryToken()
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-0 fw-bold text-dark"><i class="bi bi-truck me-2 text-primary"></i>Proveedores</h4>
+            <span class="text-muted small">Administracion completa en una sola vista mediante modales asincronos</span>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary" id="btnNuevoProveedor">
+                <i class="bi bi-plus-lg me-1"></i>Nuevo Proveedor
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Contenedor dinamico de la tabla con atributos para paginacion AJAX -->
+        <div id="proveedoresTableContainer" data-ajax-table="true" data-table-url="@Url.Action("GetTable", "Proveedores")">
+            <partial name="_TablePartial" model="Model" />
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        /**
+         * Refresca el contenido de la tabla de proveedores via AJAX
+         */
+        function refrescarTablaProveedores() {
+            var url = $('#proveedoresTableContainer').data('table-url');
+            CrudHelper.loadTable('#proveedoresTableContainer', url);
+        }
+
+        $(document).ready(function () {
+            // Abrir modal de creacion
+            $('#btnNuevoProveedor').on('click', function () {
+                var url = '@Url.Action("GetCreateModal", "Proveedores")';
+                CrudHelper.openModal(url);
+            });
+
+            // Abrir modal de edicion
+            $(document).on('click', '.btn-edit-proveedor', function () {
+                var id = $(this).data('id');
+                var url = '@Url.Action("GetEditModal", "Proveedores")' + '?id=' + id;
+                CrudHelper.openModal(url);
+            });
+
+            // Abrir modal de eliminacion logica
+            $(document).on('click', '.btn-delete-proveedor', function () {
+                var id = $(this).data('id');
+                var name = $(this).data('name');
+                var url = '@Url.Action("Delete", "Proveedores")';
+                var token = $('input[name="__RequestVerificationToken"]').first().val();
+
+                CrudHelper.confirmDelete(
+                    url,
+                    id,
+                    token,
+                    'Esta seguro de que desea eliminar al proveedor "' + name + '"?',
+                    refrescarTablaProveedores
+                );
+            });
+        });
+    </script>
+}

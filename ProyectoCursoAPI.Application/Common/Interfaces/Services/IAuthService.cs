@@ -1,13 +1,14 @@
-using ProyectoCursoAPI.Application.Common.Models;
-using ProyectoCursoAPI.Application.Common.Services.Auth.DTOs;
+using ProyectoCursoAPI.Application.Features.Auth.DTOs;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace ProyectoCursoAPI.Application.Common.Interfaces.Services
 {
+    // Contrato para autenticacion y gestion de sesiones
     public interface IAuthService
     {
-        Task<ServiceResponse<AuthResponseDto>> RegisterAsync(RegisterDto dto, CancellationToken cancellationToken = default);
-        Task<ServiceResponse<AuthResponseDto>> LoginAsync(LoginDto dto, CancellationToken cancellationToken = default);
+        Task<bool> RegisterAsync(RegisterDto dto, CancellationToken cancellationToken = default);
+        Task<bool> LoginAsync(LoginDto dto, CancellationToken cancellationToken = default);
+        Task LogoutAsync();
     }
 }

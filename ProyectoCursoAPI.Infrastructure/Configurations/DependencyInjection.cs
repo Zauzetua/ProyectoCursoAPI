@@ -10,18 +10,19 @@ using ProyectoCursoAPI.Infrastructure.Services;
 
 namespace ProyectoCursoAPI.Infrastructure.Configurations
 {
+    // Configuracion de dependencias de la capa de infraestructura
     public static class DependencyInjection
     {
         public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            // Configuro mi cadena de conexion optimizada
+            // Conexion a la base de datos con SQL Server
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
-            // Configuración de ASP.NET Core Identity (API / Tokens)
-            services.AddIdentityCore<IdentityUser>(options =>
+            // Configuracion de ASP.NET Core Identity completo (incluye SignInManager, Roles y Cookies)
+            services.AddIdentity<IdentityUser, IdentityRole>(options =>
             {
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 6;
@@ -30,11 +31,20 @@ namespace ProyectoCursoAPI.Infrastructure.Configurations
                 options.Password.RequireLowercase = false;
                 options.User.RequireUniqueEmail = true;
             })
-            .AddRoles<IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
-            // Servicios de infraestructura para seguridad y JWT
-            services.AddScoped<IJwtTokenService, JwtTokenService>();
+            // Configuracion de la cookie de autenticacion
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Account/Login";
+                options.LogoutPath = "/Account/Logout";
+                options.AccessDeniedPath = "/Account/AccessDenied";
+                options.ExpireTimeSpan = System.TimeSpan.FromDays(7);
+                options.SlidingExpiration = true;
+            });
+
+            // Servicio de autenticacion de infraestructura basado en Identity
             services.AddScoped<IAuthService, AuthService>();
 
             AddRepositories(services);
@@ -42,7 +52,6 @@ namespace ProyectoCursoAPI.Infrastructure.Configurations
 
         public static void AddRepositories(this IServiceCollection services)
         {
-            //Aqui van los repositorios de la capa de infraestructura.
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IProveedorRepository, ProveedorRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();

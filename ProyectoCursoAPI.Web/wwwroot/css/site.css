@@ -1,0 +1,33 @@
+/* Estilos generales del sistema */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+}
+
+main {
+    flex: 1;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.badge-status-active {
+    background-color: #198754;
+    color: #ffffff;
+}
+
+.badge-status-inactive {
+    background-color: #dc3545;
+    color: #ffffff;
+}
+
+.modal-header {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+}

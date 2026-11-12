@@ -1,0 +1,70 @@
+@model ProyectoCursoAPI.Web.Models.Categorias.CategoriaIndexViewModel
+@{
+    ViewData["Title"] = "Gestion de Categorias";
+}
+
+<!-- Token antiforgery para peticiones AJAX de borrado -->
+@Html.AntiForgeryToken()
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-0 fw-bold text-dark"><i class="bi bi-grid me-2 text-primary"></i>Categorias</h4>
+            <span class="text-muted small">Administracion completa en una sola vista mediante modales asincronos</span>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary" id="btnNuevaCategoria">
+                <i class="bi bi-plus-lg me-1"></i>Nueva Categoria
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Contenedor dinamico de la tabla con atributos para paginacion AJAX -->
+        <div id="categoriasTableContainer" data-ajax-table="true" data-table-url="@Url.Action("GetTable", "Categorias")">
+            <partial name="_TablePartial" model="Model" />
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        /**
+         * Refresca el contenido de la tabla de categorias via AJAX
+         */
+        function refrescarTablaCategorias() {
+            var url = $('#categoriasTableContainer').data('table-url');
+            CrudHelper.loadTable('#categoriasTableContainer', url);
+        }
+
+        $(document).ready(function () {
+            // Abrir modal de creacion
+            $('#btnNuevaCategoria').on('click', function () {
+                var url = '@Url.Action("GetCreateModal", "Categorias")';
+                CrudHelper.openModal(url);
+            });
+
+            // Abrir modal de edicion
+            $(document).on('click', '.btn-edit-categoria', function () {
+                var id = $(this).data('id');
+                var url = '@Url.Action("GetEditModal", "Categorias")' + '?id=' + id;
+                CrudHelper.openModal(url);
+            });
+
+            // Abrir modal de eliminacion logica
+            $(document).on('click', '.btn-delete-categoria', function () {
+                var id = $(this).data('id');
+                var name = $(this).data('name');
+                var url = '@Url.Action("Delete", "Categorias")';
+                var token = $('input[name="__RequestVerificationToken"]').first().val();
+
+                CrudHelper.confirmDelete(
+                    url,
+                    id,
+                    token,
+                    'Esta seguro de que desea eliminar la categoria "' + name + '"?',
+                    refrescarTablaCategorias
+                );
+            });
+        });
+    </script>
+}
